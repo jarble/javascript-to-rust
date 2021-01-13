@@ -228,8 +228,13 @@ parentheses_expr:
 parentheses_expr_:
     "[" "]" {$$ = "()";}
     | "[" exprs "]" {$$ = "("+$2+")";}
-    | NUMBER {if($1.indexOf(".") !== -1){$$=$1+.0}else{$$=$1;}}
-        {$$ = yytext;}
+    | NUMBER {
+		if($1.indexOf(".") === -1){
+			$$=$1+".0"
+		}
+		else{
+			$$=$1;
+		}}
     | IDENTIFIER
         {$$ = yytext;}
     | STRING_LITERAL
