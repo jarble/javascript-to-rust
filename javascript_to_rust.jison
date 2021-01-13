@@ -134,7 +134,8 @@ statement_with_semicolon_: initialize_var1 | statement_with_semicolon;
 statement_with_semicolon
    : 
    "return" e  {$$ = ["return",$2].join(" ");}
-   | "const" IDENTIFIER ":" type_ "=" e {$$ = ["const",$4,$2,"=",$6].join(" ");}
+   | "const" IDENTIFIER ":" type_ "=" e {$$ = ["let ",$2,":",$4,"=",$6].join(" ");}
+   | "const" IDENTIFIER "=" e {$$ = "let "+$2+" = "+$4;}
    | access_array "=" e {$$ = [$1,"=",$3].join(" ");}
    | "var" IDENTIFIER "=" e {$$ = "let mut "+$2+" = "+$4;}
    | "var" IDENTIFIER ":" type_ "=" e {$$ = $4 + " "+$2+" = "+$6}
@@ -227,7 +228,7 @@ parentheses_expr:
 parentheses_expr_:
     "[" "]" {$$ = "()";}
     | "[" exprs "]" {$$ = "("+$2+")";}
-    | NUMBER
+    | NUMBER {if($1.indexOf(".") !== -1){$$=$1+.0}else{$$=$1;}}
         {$$ = yytext;}
     | IDENTIFIER
         {$$ = yytext;}
