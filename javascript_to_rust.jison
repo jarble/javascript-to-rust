@@ -119,13 +119,16 @@ top_level_statement:
     ;
 top_level_statements: top_level_statements top_level_statement {$$ = $1+"\\n"+$2;} | top_level_statement {$$ =
  $1;};
+ 
+var_or_let: "var" | "let"; 
+
 statement
     :
     statement_with_semicolon ";" {$$ = [$1,";"].join("");}
-    | "switch" "(" e ")" "{" case_statements "}" {$$ = ["switch(",$3,"){",$6,"}"].join("");}
+    | "switch" "(" e ")" "{" case_statements "}" {$$ = ["match ",$3,"{",$6,"}"].join("");}
     | "while" "(" e ")" bracket_statements {$$ = ["while ",$3," ",$5].join("");}
-    // | "for" "(" "var" IDENTIFIER "of" e ")" bracket_statements {$$ = ["for(int i = 0; i < "+$4+".length(),i++){"+$8+"}"]}
-    | "for" "(" statement_with_semicolon_ ";" e ";" statement_with_semicolon_ ")" bracket_statements {$$ = ["for(",$3,";",$5,";",$7,")",$9].join("");}
+    | "for" "(" "var" IDENTIFIER "of" e ")" bracket_statements {$$ = ["for ",$4," of ",$6,$8].join("")}
+    //| "for" "(" statement_with_semicolon_ ";" e ";" statement_with_semicolon_ ")" bracket_statements {$$ = ["for(",$3,";",$5,";",$7,")",$9].join("");}
     | if_statement
     ;
 
@@ -153,7 +156,7 @@ statement_with_semicolon
 
 e
     :
-     e "?" e ":" e {$$ = ["if " $1,"{",$3,"}else{",$5,"}"].join(" ")}
+     e "?" e ":" e {$$ = ["if ",$1,"{",$3,"}else{",$5,"}"].join(" ")}
     |e '||' e
         {$$ = [$1,$2,$3].join(" ");}
     |e '|' e
