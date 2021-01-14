@@ -1,3 +1,6 @@
+//to do:
+//generate closures using macros
+
 /* lexical grammar */
 %lex
 %%
@@ -136,7 +139,7 @@ statement_with_semicolon_: initialize_var1 | statement_with_semicolon;
 
 statement_with_semicolon
    : 
-   "return" e  {$$ = ["return",$2].join(" ");}
+   "return" e  {$$ = [$2].join(" ");}
    | "const" IDENTIFIER ":" type_ "=" e {$$ = ["let ",$2,":",$4,"=",$6].join(" ");}
    | "const" IDENTIFIER "=" e {$$ = "let "+$2+" = "+$4;}
    | access_array "=" e {$$ = [$1,"=",$3].join(" ");}
