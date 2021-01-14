@@ -30,6 +30,7 @@
 "break"               return 'break'
 "for"                 return 'for'
 "var"                 return 'var'
+"let"                 return 'let'
 "of"                  return 'of'
 "Math"                return "Math"
 "number"              return 'number'
@@ -114,7 +115,6 @@ top_level_statement:
 	statement
 	| initialize_var1 ";" {$$ = $1+";"}
 	| "function" IDENTIFIER "(" identifiers ")" "{" statements "}" {$$ = "macro_rules! "+$2+" { ($"+$4.split(",").join(":expr,$")+":expr) => {{ let ("+$4+") = ($"+$4.split(",").join(",$")+");"+$7+"}}}";}	
-    | "function" IDENTIFIER "(" parameters ")" ":" type_ bracket_statements {$$ = [$7,$2,"(",$4,")",$8].join(" ");}
     | "class" IDENTIFIER "{" class_statements "}" {$$ = "struct "+$2+"{"+$4+"}";}
     ;
 top_level_statements: top_level_statements top_level_statement {$$ = $1+"\\n"+$2;} | top_level_statement {$$ =
@@ -140,8 +140,8 @@ statement_with_semicolon
    | "const" IDENTIFIER ":" type_ "=" e {$$ = ["let ",$2,":",$4,"=",$6].join(" ");}
    | "const" IDENTIFIER "=" e {$$ = "let "+$2+" = "+$4;}
    | access_array "=" e {$$ = [$1,"=",$3].join(" ");}
-   | "var" IDENTIFIER "=" e {$$ = "let mut "+$2+" = "+$4;}
-   | "var" IDENTIFIER ":" type_ "=" e {$$ = $4 + " "+$2+" = "+$6}
+   | var_or_let IDENTIFIER "=" e {$$ = "let mut "+$2+" = "+$4;}
+   | var_or_let IDENTIFIER ":" type_ "=" e {$$ = $4 + " "+$2+" = "+$6}
    | "const" IDENTIFIER ":" type_ "[" "]" "=" "[" exprs "]" {$$ = "const " + $4 + "[] "+$2+" = "+$4+"[]("+$9+")"}
    | IDENTIFIER "=" e {$$ = [$1,"=",$3].join(" ");}
    | IDENTIFIER "." IDENTIFIER "=" e {$$ = ["set_var",[".",[$1,$3]],$5];}
@@ -204,8 +204,8 @@ access_array: parentheses_expr "[" e "]" {$$ = $1+"["+$3+"]";};
 parentheses_expr:
     IDENTIFIER "(" ")" {$$= $1+"()";}
     | "new" IDENTIFIER "(" exprs ")" {$$= [$2,"(",$4,")"].join("");}
-    | IDENTIFIER "(" exprs ")" {$$= [$1,"(",$3,")"].join("");}
-    | "Number" "(" exprs ")" {$$= ["float(",$3,")"].join("");}
+    | IDENTIFIER "(" exprs ")" {$$= [$1,"!(",$3,")"].join("");}
+    // | "Number" "(" exprs ")" {$$= ["float(",$3,")"].join("");}
     | "Math" "." IDENTIFIER "(" e ")" {$$ = $3+"("+$5+")";}
     | "Math" "." IDENTIFIER {
 		if($3 == "E"){
