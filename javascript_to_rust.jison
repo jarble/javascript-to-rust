@@ -117,7 +117,7 @@ access_modifier: "public" | "private";
 top_level_statement:
 	statement
 	| initialize_var1 ";" {$$ = $1+";"}
-	| "function" IDENTIFIER "(" identifiers ")" "{" statements "}" {$$ = "macro_rules! "+$2+" { ($"+$4.split(",").join(":expr,$")+":expr) => {{ let ("+$4+") = ($"+$4.split(",").join(",$")+");"+$7+"}}}";}	
+	| "function" IDENTIFIER "(" identifiers ")" "{" statements "}" {$$ = "macro_rules! "+$2+" {($"+$4.split(",").join(":expr,$")+":expr) => {(|"+$4+"|{"+$7+"})($"+$4.split(",").join(",$")+")}}";}	 
     | "class" IDENTIFIER "{" class_statements "}" {$$ = "struct "+$2+"{"+$4+"}";}
     ;
 top_level_statements: top_level_statements top_level_statement {$$ = $1+"\\n"+$2;} | top_level_statement {$$ =
@@ -139,7 +139,7 @@ statement_with_semicolon_: initialize_var1 | statement_with_semicolon;
 
 statement_with_semicolon
    : 
-   "return" e  {$$ = [$2].join(" ");}
+   "return" e  {$$ = ["return ",$2].join(" ");}
    | "const" IDENTIFIER ":" type_ "=" e {$$ = ["let ",$2,":",$4,"=",$6].join(" ");}
    | "const" IDENTIFIER "=" e {$$ = "let "+$2+" = "+$4;}
    | access_array "=" e {$$ = [$1,"=",$3].join(" ");}
@@ -236,10 +236,10 @@ parentheses_expr_:
     | "[" exprs "]" {$$ = "("+$2+")";}
     | NUMBER {
 		if($1.indexOf(".") === -1){
-			$$=$1+".0"
+			$$=$1+".0f64"
 		}
 		else{
-			$$=$1;
+			$$=$1+"f64";
 		}}
     | IDENTIFIER
         {$$ = yytext;}
