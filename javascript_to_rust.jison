@@ -111,9 +111,6 @@ case_statements_: case_statement case_statements_ {$$ = $1+"|"+$2;} | case_state
  $1;};
 case_statements: case_statements_ "default" ":" statements {$$ = $1+["_ =>",$4].join("");} | case_statements_;
 
-
-access_modifier: "public" | "private";
-
 top_level_statement:
 	statement
 	| initialize_var1 ";" {$$ = $1+";"}
@@ -228,7 +225,8 @@ parentheses_expr:
 		}
 	}
 	| access_array
-    | '(' e ')' {$$ = "("+$+")";}
+	| "function" "(" identifiers ")" "{" statements "}" {$$ = "(|"+$3+"|{"+$6+"})";}	
+    | '(' e ')' {$$ = "("+$2+")";}
     | parentheses_expr_;
 
 parentheses_expr_:
@@ -244,7 +242,8 @@ parentheses_expr_:
     | IDENTIFIER
         {$$ = yytext;}
     | STRING_LITERAL
-        {$$ = yytext;};
+        {$$ = yytext;}
+    | callable_expr;
 
 parameter:
 	IDENTIFIER ":" type_ {$$ = [$3, $1].join(" ");}
